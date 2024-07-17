@@ -1,3 +1,16 @@
 {
-  "extends": "next/core-web-vitals"
+    "extends": [
+        "next",
+        "next/core-web-vitals",
+        "airbnb",
+        "plugin:prettier/recommended"
+    ],
+    "rules": {
+        "indent": ["error", 4],
+        "semi": ["error", "always"],
+        "prettier/prettier": [
+            "error",
+            { "endOfLine": "auto", "semi": true, "tabWidth": 4 }
+        ]
+    }
 }
