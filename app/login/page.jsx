@@ -2,36 +2,37 @@
 
 import axios from 'axios';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const router = useRouter();
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        const userCredentials = {
-            email,
-            password,
-            key: adminKey
-        };
-        axios
-            .post('http://localhost:4000/login', userCredentials)
-            .then((response) => {
-                if (response.status === 200 && response.data.status) {
-                    navigate('/profil');
-                } else {
-                    setErrorMessage(
-                        "Email, mot de passe ou clé d'administrateur incorrecte."
-                    );
-                }
-            })
-            .catch((error) => {
-                console.log(error);
-                setErrorMessage(
-                    'Une erreur est survenue lors de la connexion.'
-                );
-            });
+        const userCredentials = { email, password };
+
+        try {
+            const response = await axios.post(
+                'http://localhost:4000/users/login',
+                userCredentials
+            );
+            if (response.status === 200) {
+                const { token, user } = response.data;
+                localStorage.setItem('token', token);
+                // Redirect to profile page or any protected route
+                router.push('/profile');
+            } else {
+                setErrorMessage('Email ou mot de passe incorrect.');
+            }
+        } catch (error) {
+            console.error(error);
+            setErrorMessage('Une erreur est survenue lors de la connexion.');
+        }
     };
+
     return (
         <main className="flex min-h-screen items-center justify-center bg-gray-100">
             <div className="w-full max-w-sm p-6 bg-white rounded-lg shadow-md">
@@ -71,6 +72,9 @@ export default function Login() {
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
+                    {errorMessage && (
+                        <div className="mb-4 text-red-600">{errorMessage}</div>
+                    )}
                     <div className="flex items-center justify-between">
                         <button
                             className="btn btn-primary w-full"
